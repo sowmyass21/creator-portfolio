@@ -1,0 +1,35 @@
+
+ALEXANDER PIERCE
+Lead Software Architect
+Email: alexander.pierce@example.com | Phone: +1 (555) 234-5678 | Location: Seattle, WA
+GitHub: https://github.com/alexanderpierce | LinkedIn: https://linkedin.com/in/alexanderpierce
+
+PROFESSIONAL SUMMARY
+Innovative Full-Stack Software Architect with 6+ years of experience designing and scaling web applications using React, Node.js, and Cloud Infrastructure.
+
+WORK EXPERIENCE
+Senior Staff Engineer at TechCorp Inc (Jan 2021 - Present)
+- Led frontend architecture team in migrating legacy SPA to Next.js 14, improving page load speeds by 45%.
+- Designed Express REST APIs and MongoDB schemas serving 2.5 million active users monthly.
+- Automated CI/CD pipelines using GitHub Actions and Docker.
+
+Software Developer at CloudSystems (Jun 2018 - Dec 2020)
+- Developed real-time analytics dashboard with React and WebSockets.
+- Optimized PostgreSQL database queries, reducing latency by 30%.
+
+TECHNICAL SKILLS
+Programming Languages: JavaScript, TypeScript, Python, SQL, Go
+Frameworks & Libraries: React, Next.js, Express, Node.js, Tailwind CSS, Redux
+Databases: MongoDB, PostgreSQL, Redis
+Cloud & Tools: AWS, Docker, Git, Kubernetes, Vercel
+
+EDUCATION
+B.S. in Computer Science - University of Washington (2014 - 2018)
+CGPA: 3.9 / 4.0
+
+PROJECTS
+Real-Time Code Collaboration Platform
+- Built live multi-user collaborative code editor with WebSockets and OT algorithm.
+- GitHub: https://github.com/alexanderpierce/code-collab
+- Live Demo: https://code-collab-demo.dev
+    

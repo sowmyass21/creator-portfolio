@@ -1,0 +1,56 @@
+name: Creator Pulse CI/CD Automated Workflow
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    name: Build, Lint & Test Automated Pipeline
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment (v20)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install All Dependencies
+        run: |
+          npm --prefix server install
+          npm --prefix client install
+
+      - name: Validate Backend Node Syntax & Security Middleware
+        run: |
+          node --check server/server.js
+          node --check server/routes/index.js
+
+      - name: Execute Security & Authentication Test Suite
+        env:
+          PORT: 5000
+          NODE_ENV: test
+          JWT_SECRET: super_secret_jwt_key_creator_portfolio_2026_x89f
+          COOKIE_SECRET: super_secret_cookie_parser_key_2026
+        run: |
+          npm --prefix server start &
+          sleep 4
+          node server/scratch/test_phase10_security.js
+
+      - name: Build Frontend React/Vite Bundle
+        run: |
+          npm --prefix client run build
+
+      - name: Verify Build Artifacts & Deployment Preparation
+        run: |
+          if [ ! -d "client/dist" ]; then
+            echo "::error::Deployment Preparation Failed: client/dist directory does not exist!"
+            exit 1
+          fi
+          echo "✓ Client build artifacts successfully generated in client/dist"
+          ls -la client/dist

@@ -1,0 +1,27 @@
+%PDF-1.4
+1 0 obj
+<< /Title (Resume) >>
+endobj
+
+ALEXANDER PIERCE
+Lead Software Architect
+Email: alexander.pierce@example.com | Phone: +1 (555) 234-5678 | Location: Seattle, WA
+GitHub: https://github.com/alexanderpierce | LinkedIn: https://linkedin.com/in/alexanderpierce
+
+PROFESSIONAL SUMMARY
+Innovative Full-Stack Software Architect with 6+ years of experience designing and scaling web applications using React, Node.js, and Cloud Infrastructure.
+
+WORK EXPERIENCE
+TechCorp Inc (Jan 2021 - Present) - Senior Staff Engineer
+- Led frontend architecture team in migrating legacy SPA to Next.js 14, improving page load speeds by 45%.
+- Designed Express REST APIs and MongoDB schemas serving 2.5 million active users monthly.
+
+EDUCATION
+B.S. in Computer Science - University of Washington (2014 - 2018)
+CGPA: 3.9 / 4.0
+
+SKILLS
+Programming: JavaScript, TypeScript, Python, Go, SQL
+Frameworks: React, Next.js, Express, Redux, Tailwind CSS
+Databases: MongoDB, PostgreSQL, Redis
+Cloud & Tools: AWS, Docker, Kubernetes, Git

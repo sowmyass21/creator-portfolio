@@ -1,0 +1,25 @@
+{
+  "name": "creator-portfolio-monorepo",
+  "version": "1.0.0",
+  "description": "Creator Social Metric Aggregator & Dynamic Portfolio Builder Phase 11",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "portfolio": "./bin/portfolio.js"
+  },
+  "scripts": {
+    "portfolio": "node ./bin/portfolio.js",
+    "install:server": "npm --prefix server install",
+    "install:client": "npm --prefix client install",
+    "install:all": "npm --prefix server install && npm --prefix client install",
+    "seed": "npm --prefix server run seed",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev",
+    "start:server": "npm --prefix server start",
+    "build:client": "npm --prefix client run build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

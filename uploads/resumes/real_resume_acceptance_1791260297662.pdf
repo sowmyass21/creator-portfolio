@@ -1,0 +1,43 @@
+%PDF-1.4
+1 0 obj
+<< /Title (Real Resume) >>
+endobj
+stream
+ELEANOR VANCE
+Senior Cloud & Full Stack Engineer
+Email: eleanor.vance@techdomain.org | Phone: +1 (555) 876-5432 | Location: San Francisco, CA
+LinkedIn: https://linkedin.com/in/eleanorvance | GitHub: https://github.com/eleanorvance
+
+PROFESSIONAL SUMMARY
+Senior Cloud & Full Stack Engineer with 7+ years of experience engineering high-throughput microservices, React web applications, and multi-region AWS cloud solutions.
+
+WORK EXPERIENCE
+CloudScale Systems - Lead Software Engineer (March 2022 - Present)
+- Architected event-driven microservices architecture using Node.js, Express, and Apache Kafka handling 10M+ daily events.
+- Redesigned web dashboard in React 18, reducing time-to-interactive by 60%.
+
+DataPulse Technologies - Senior Full Stack Developer (June 2018 - February 2022)
+- Built automated ETL data ingestion pipelines using Python, Docker, and PostgreSQL.
+- Mentored a team of 6 junior software engineers in TypeScript and CI/CD best practices.
+
+EDUCATION
+Bachelor of Science in Computer Engineering
+University of California, Berkeley (2014 - 2018)
+Graduated with Honors | Magna Cum Laude
+
+SKILLS
+Programming Languages: JavaScript, TypeScript, Python, Go, SQL
+Frontend Development: React, Redux, Next.js, HTML5, CSS3, Tailwind CSS
+Backend & Cloud: Node.js, Express, PostgreSQL, MongoDB, Redis, AWS, Docker, Kubernetes
+
+CERTIFICATIONS
+- AWS Certified Solutions Architect - Professional (2023)
+- Certified Kubernetes Administrator (CKA) (2022)
+
+PROJECTS
+High-Frequency Analytics Engine
+- Real-time stream processing platform built with Go, Redis, and WebSockets.
+- Live Demo: https://analytics.techdomain.org
+
+endstream
+endobj
