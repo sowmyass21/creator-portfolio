@@ -19,7 +19,7 @@ export const validateRegister = [
     .trim()
     .isEmail()
     .withMessage('Please provide a valid email address')
-    .normalizeEmail(),
+    .normalizeEmail({ gmail_remove_dots: false, all_lowercase: true }),
   body('password')
     .isLength({ min: 6 })
     .withMessage('Password must be at least 6 characters long'),
@@ -31,7 +31,7 @@ export const validateLogin = [
     .trim()
     .isEmail()
     .withMessage('Please provide a valid email address')
-    .normalizeEmail(),
+    .normalizeEmail({ gmail_remove_dots: false, all_lowercase: true }),
   body('password')
     .notEmpty()
     .withMessage('Password is required'),
@@ -43,7 +43,7 @@ export const validateForgotPassword = [
     .trim()
     .isEmail()
     .withMessage('Please provide a valid email address')
-    .normalizeEmail(),
+    .normalizeEmail({ gmail_remove_dots: false, all_lowercase: true }),
   handleValidationErrors
 ];
 

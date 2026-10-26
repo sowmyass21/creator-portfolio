@@ -58,13 +58,13 @@ export const RegisterPage = () => {
               <div className="flex-1">
                 <span>{error}</span>
                 {error.toLowerCase().includes('already exists') && (
-                  <div className="mt-1 flex items-center gap-3 font-semibold">
-                    <Link to="/login" className="underline hover:opacity-80">
+                  <div className="mt-1.5 flex items-center gap-3 font-semibold">
+                    <Link to="/login" state={{ email }} className="underline hover:opacity-80">
                       Sign In &rarr;
                     </Link>
                     <span>•</span>
-                    <Link to="/forgot-password" className="underline hover:opacity-80">
-                      Forgot Password?
+                    <Link to="/forgot-password" state={{ email }} className="underline hover:opacity-80">
+                      Reset Password for this email &rarr;
                     </Link>
                   </div>
                 )}

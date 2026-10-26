@@ -2,7 +2,7 @@ import rateLimit from 'express-rate-limit';
 
 export const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // Limit each IP to 20 auth requests per windowMs
+  max: process.env.NODE_ENV === 'production' ? 30 : 500, // Generous limit in development to prevent locking out local users
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -11,3 +11,4 @@ export const authRateLimiter = rateLimit({
     statusCode: 429
   }
 });
+

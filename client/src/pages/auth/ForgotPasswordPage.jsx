@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import ThemeToggle from '../../components/ThemeToggle';
 import apiService from '../../services/api';
 import { Sparkles, Mail, ArrowRight, CheckCircle2, ArrowLeft, AlertCircle, ExternalLink, RefreshCw } from 'lucide-react';
 
 export const ForgotPasswordPage = () => {
-  const [email, setEmail] = useState('');
+  const location = useLocation();
+  const [email, setEmail] = useState(location.state?.email || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);

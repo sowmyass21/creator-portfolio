@@ -115,7 +115,14 @@ export const getPublicPortfolioBySlug = async (req, res) => {
     const normalizedSlug = slug.toLowerCase().trim();
 
     // Query portfolio by slug
-    const portfolio = await Portfolio.findOne({ slug: normalizedSlug });
+    let portfolio = await Portfolio.findOne({ slug: normalizedSlug });
+
+    // Fallback for demo slugs (e.g., 'demo', 'elenacodes', 'live-demo', 'preview') to active published portfolio
+    if (!portfolio && ['elenacodes', 'demo', 'live-demo', 'preview', 'sample'].includes(normalizedSlug)) {
+      portfolio = await Portfolio.findOne({ published: true, status: 'PUBLISHED' })
+        || await Portfolio.findOne({ published: true })
+        || await Portfolio.findOne();
+    }
 
     // STRICT CHECK: Return 404 if not found or if status is DRAFT/ARCHIVED
     if (!portfolio || (portfolio.status !== 'PUBLISHED' && !portfolio.published)) {
