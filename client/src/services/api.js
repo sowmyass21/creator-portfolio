@@ -8,7 +8,7 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
   withCredentials: true,
-  timeout: 10000,
+  timeout: 30000,
 });
 
 // Request interceptor to attach Bearer token if available
@@ -121,7 +121,10 @@ export const apiService = {
       headers.Authorization = `Bearer ${token}`;
       headers['x-auth-token'] = token;
     }
-    return apiClient.post('/resume/upload', data, { headers });
+    return apiClient.post('/resume/upload', data, { 
+      headers,
+      timeout: 120000 
+    });
   },
   getResumeById: (id) => apiClient.get(`/resume/${id}`),
   getResumeStatusById: (id) => apiClient.get(`/resume/${id}/status`),

@@ -32,6 +32,7 @@ const allowedOrigins = [
   process.env.CLIENT_URL,
   process.env.CORS_ORIGIN,
   'http://localhost:5173',
+  'http://localhost:5174',
   'http://localhost:3000'
 ].filter(Boolean);
 
@@ -49,7 +50,7 @@ const corsOptions = {
     return callback(null, true);
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'x-auth-token', 'Accept', 'Origin'],
   credentials: true,
 };
 app.use(cors(corsOptions));
