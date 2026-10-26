@@ -15,6 +15,9 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await apiService.getMe();
       if (res && res.data && res.data.user) {
+        if (res.data.token) {
+          localStorage.setItem('token', res.data.token);
+        }
         setUser(res.data.user);
       } else {
         setUser(null);
@@ -32,11 +35,11 @@ export const AuthProvider = ({ children }) => {
 
   const cleanSessionData = () => {
     const savedTheme = localStorage.getItem('theme');
-    localStorage.clear();
+    localStorage.removeItem('token');
+    sessionStorage.clear();
     if (savedTheme) {
       localStorage.setItem('theme', savedTheme);
     }
-    sessionStorage.clear();
   };
 
   const login = async (email, password) => {
@@ -46,6 +49,9 @@ export const AuthProvider = ({ children }) => {
       cleanSessionData();
       const res = await apiService.login({ email, password });
       if (res && res.data && res.data.user) {
+        if (res.data.token) {
+          localStorage.setItem('token', res.data.token);
+        }
         setUser(res.data.user);
         window.dispatchEvent(new CustomEvent('auth:login', { detail: res.data.user }));
         return res.data.user;
@@ -65,6 +71,9 @@ export const AuthProvider = ({ children }) => {
       cleanSessionData();
       const res = await apiService.register({ name, email, password });
       if (res && res.data && res.data.user) {
+        if (res.data.token) {
+          localStorage.setItem('token', res.data.token);
+        }
         setUser(res.data.user);
         window.dispatchEvent(new CustomEvent('auth:login', { detail: res.data.user }));
         return res.data.user;
@@ -85,13 +94,8 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout error:', err.message);
     } finally {
       setUser(null);
-      // Clean up localStorage and sessionStorage except user's preferred theme
-      const savedTheme = localStorage.getItem('theme');
-      localStorage.clear();
-      if (savedTheme) {
-        localStorage.setItem('theme', savedTheme);
-      }
-      sessionStorage.clear();
+      localStorage.removeItem('token');
+      sessionStorage.removeItem('token');
       window.dispatchEvent(new Event('auth:logout'));
       setLoading(false);
     }

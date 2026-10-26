@@ -29,7 +29,7 @@ export const register = async (req, res, next) => {
 
     return sendSuccess(
       res,
-      { user },
+      { user, token },
       'User account registered successfully',
       201
     );
@@ -55,7 +55,7 @@ export const login = async (req, res, next) => {
 
     return sendSuccess(
       res,
-      { user },
+      { user, token },
       'Logged in successfully',
       200
     );
@@ -77,7 +77,8 @@ export const logout = async (req, res) => {
 
 export const getMe = async (req, res) => {
   // req.user attached by authenticate middleware
-  return sendSuccess(res, { user: req.user }, 'Current user profile retrieved', 200);
+  const token = req.token || (req.user ? generateToken(req.user._id || req.user.id) : null);
+  return sendSuccess(res, { user: req.user, token }, 'Current user profile retrieved', 200);
 };
 
 export const forgotPassword = async (req, res, next) => {
@@ -123,7 +124,7 @@ export const resetPassword = async (req, res, next) => {
 
     return sendSuccess(
       res,
-      { user },
+      { user, token: authToken },
       'Password has been reset successfully. You are now logged in.',
       200
     );

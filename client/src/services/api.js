@@ -11,6 +11,21 @@ const apiClient = axios.create({
   timeout: 10000,
 });
 
+// Request interceptor to attach Bearer token if available
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = typeof window !== 'undefined' 
+      ? (localStorage.getItem('token') || sessionStorage.getItem('token'))
+      : null;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+      config.headers['x-auth-token'] = token;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 // Response interceptor
 apiClient.interceptors.response.use(
   (response) => response.data,
@@ -98,12 +113,15 @@ export const apiService = {
 
   // AI Resume → Dynamic Portfolio Builder
   uploadResume: (data) => {
-    if (typeof FormData !== 'undefined' && data instanceof FormData) {
-      return apiClient.post('/resume/upload', data, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+    const token = typeof window !== 'undefined'
+      ? (localStorage.getItem('token') || sessionStorage.getItem('token'))
+      : null;
+    const headers = {};
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+      headers['x-auth-token'] = token;
     }
-    return apiClient.post('/resume/upload', data);
+    return apiClient.post('/resume/upload', data, { headers });
   },
   getResumeById: (id) => apiClient.get(`/resume/${id}`),
   getResumeStatusById: (id) => apiClient.get(`/resume/${id}/status`),
