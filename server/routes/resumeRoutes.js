@@ -35,6 +35,10 @@ const handleUploadMiddleware = (req, res, next) => {
         : err.message || 'File upload error.';
       return sendError(res, message, statusCode);
     }
+    // Normalize req.file from req.files when using multer.any()
+    if (!req.file && Array.isArray(req.files) && req.files.length > 0) {
+      req.file = req.files[0];
+    }
     next();
   });
 };

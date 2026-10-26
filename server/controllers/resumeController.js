@@ -32,17 +32,19 @@ export const uploadResume = async (req, res) => {
 
     console.log(`[UPLOAD RECEIVED] Received upload request for user: ${userId}`);
 
-    if (req.file) {
-      fileBuffer = fs.readFileSync(req.file.path);
+    const uploadedFile = req.file || (Array.isArray(req.files) && req.files.length > 0 ? req.files[0] : null);
+
+    if (uploadedFile) {
+      fileBuffer = fs.readFileSync(uploadedFile.path);
       fileMeta = {
-        originalFileName: req.file.originalname,
-        originalFilename: req.file.originalname,
-        mimeType: req.file.mimetype || 'application/pdf',
-        fileType: req.file.mimetype || 'application/pdf',
-        fileSize: req.file.size,
-        storagePath: req.file.path,
+        originalFileName: uploadedFile.originalname,
+        originalFilename: uploadedFile.originalname,
+        mimeType: uploadedFile.mimetype || 'application/pdf',
+        fileType: uploadedFile.mimetype || 'application/pdf',
+        fileSize: uploadedFile.size,
+        storagePath: uploadedFile.path,
       };
-    } else if (req.body && (req.body.filename || req.body.rawText)) {
+    } else if (req.body && (req.body.filename || req.body.rawText || req.body.content)) {
       const originalFilename = req.body.filename || 'resume.pdf';
       const ext = path.extname(originalFilename).toLowerCase() || '.pdf';
       const content = req.body.rawText || req.body.content || '';

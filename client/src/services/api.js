@@ -11,9 +11,16 @@ const apiClient = axios.create({
   timeout: 30000,
 });
 
-// Request interceptor to attach Bearer token if available
+// Request interceptor to attach Bearer token and handle FormData Content-Type correctly
 apiClient.interceptors.request.use(
   (config) => {
+    // If payload is FormData, remove application/json so browser sets multipart/form-data boundary
+    if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+      if (config.headers.common) {
+        delete config.headers.common['Content-Type'];
+      }
+    }
     const token = typeof window !== 'undefined' 
       ? (localStorage.getItem('token') || sessionStorage.getItem('token'))
       : null;
@@ -120,6 +127,16 @@ export const apiService = {
     if (token) {
       headers.Authorization = `Bearer ${token}`;
       headers['x-auth-token'] = token;
+    }
+    if (typeof FormData !== 'undefined' && data instanceof FormData) {
+      delete headers['Content-Type'];
+      return apiClient.post('/resume/upload', data, { 
+        headers: {
+          ...headers,
+          'Content-Type': undefined
+        },
+        timeout: 120000 
+      });
     }
     return apiClient.post('/resume/upload', data, { 
       headers,

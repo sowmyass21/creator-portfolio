@@ -53,6 +53,6 @@ export const resumeUploadMiddleware = multer({
   limits: {
     fileSize: 10 * 1024 * 1024, // 10 MB limit
   },
-}).single('file');
+}).any();
 
 export default resumeUploadMiddleware;
