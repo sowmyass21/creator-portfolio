@@ -5,7 +5,7 @@ import { usePortfolio } from '../../context/PortfolioContext';
 import apiService from '../../services/api';
 import ThemeToggle from '../../components/ThemeToggle';
 import { 
-  Sparkles, LayoutDashboard, User, FolderGit2, Share2, BarChart3, Cpu, Settings, 
+  Sparkles, LayoutDashboard, User, FolderGit2, Share2, BarChart3, Cpu, 
   LogOut, RefreshCw, Menu, X, ChevronRight, ExternalLink, FileText, UploadCloud, CheckCircle2, AlertCircle
 } from 'lucide-react';
 
@@ -55,7 +55,6 @@ export const DashboardLayout = () => {
     { name: 'Connected Platforms', path: '/dashboard/platforms', icon: Share2 },
     { name: 'Analytics', path: '/dashboard/analytics', icon: BarChart3 },
     { name: 'AI Generator', path: '/dashboard/content', icon: Cpu },
-    { name: 'CLI & Settings', path: '/dashboard/settings', icon: Settings },
   ];
 
   return (
