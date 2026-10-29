@@ -14,7 +14,7 @@ export const PublishSuccessModal = ({
 
   if (!isOpen) return null;
 
-  const url = liveDemoUrl || `${window.location.origin}/p/${slug || 'shahukarisowmya'}`;
+  const url = liveDemoUrl || `${window.location.origin}/p/${slug || 'portfolio'}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(url);

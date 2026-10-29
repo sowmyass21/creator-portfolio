@@ -81,7 +81,7 @@ export const DashboardSettings = () => {
           <div className="p-3.5 rounded-xl bg-[#F8F9FC] dark:bg-slate-950 border border-[#E4E7EC] dark:border-slate-800 text-xs space-y-1.5">
             <div>
               <span className="text-[#667085] dark:text-slate-400 mr-2">Active User:</span> 
-              <span className="font-bold text-[#172033] dark:text-white">{user?.name || 'Shahukari Sowmya'} ({user?.email || 'sowmyashahukari@gmail.com'})</span>
+              <span className="font-bold text-[#172033] dark:text-white">{user?.name || 'Authenticated User'} ({user?.email || 'No email provided'})</span>
             </div>
             <div>
               <span className="text-[#667085] dark:text-slate-400 mr-2">Assigned Server Role:</span> 

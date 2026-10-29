@@ -22,14 +22,15 @@ export const AnalyticsChart = ({
 
   // Extract numeric values according to metricType
   const getVal = (point) => {
-    if (metricType === 'views') return point.views || (point.followers ? point.followers * 18 : point.value || 0);
-    if (metricType === 'engagement') return point.engagement || 8.4;
-    return point.followers || point.value || 0;
+    if (metricType === 'views') return Number(point.views ?? point.value ?? 0);
+    if (metricType === 'stars') return Number(point.stars ?? point.value ?? 0);
+    if (metricType === 'engagement') return Number(point.engagement ?? point.value ?? 0);
+    return Number(point.followers ?? point.value ?? 0);
   };
 
   const rawValues = data.map(getVal);
-  const maxVal = Math.max(...rawValues, 100);
-  const minVal = Math.max(0, Math.min(...rawValues) * 0.85);
+  const maxVal = Math.max(...rawValues, 0);
+  const minVal = Math.max(0, Math.min(...rawValues));
   const valRange = Math.max(maxVal - minVal, 1);
 
   // SVG Chart Dimensions
@@ -357,26 +358,38 @@ export const AnalyticsChart = ({
       </div>
 
       {/* Metric Footer Stat Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
-        <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-          <span className="text-[10px] font-mono text-slate-400 block">Peak Milestone</span>
-          <span className="text-sm font-bold font-mono text-slate-900 dark:text-white">{formatNumber(maxVal)}</span>
-        </div>
-        <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-          <span className="text-[10px] font-mono text-slate-400 block">Range Baseline</span>
-          <span className="text-sm font-bold font-mono text-slate-900 dark:text-white">{formatNumber(minVal)}</span>
-        </div>
-        <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-          <span className="text-[10px] font-mono text-slate-400 block">Net Trajectory Delta</span>
-          <span className="text-sm font-bold font-mono text-emerald-400">+{formatNumber(maxVal - minVal)}</span>
-        </div>
-        <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-          <span className="text-[10px] font-mono text-slate-400 block">Growth Momentum</span>
-          <span className="text-sm font-bold font-mono text-brand-purple flex items-center gap-1">
-            <Zap className="w-3.5 h-3.5" /> 94 / 100
-          </span>
-        </div>
-      </div>
+      {(() => {
+        const startVal = points.length > 0 ? points[0].val : 0;
+        const currentVal = points.length > 0 ? points[points.length - 1].val : 0;
+        const delta = currentVal - startVal;
+        const deltaSign = delta > 0 ? '+' : '';
+        const statusLabel = delta > 0 ? 'Trending Up' : (currentVal > 0 ? 'Consistent' : 'Baseline Active');
+
+        return (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+            <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+              <span className="text-[10px] font-mono text-slate-400 block">Peak Milestone</span>
+              <span className="text-sm font-bold font-mono text-slate-900 dark:text-white">{formatNumber(maxVal)}</span>
+            </div>
+            <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+              <span className="text-[10px] font-mono text-slate-400 block">Range Baseline</span>
+              <span className="text-sm font-bold font-mono text-slate-900 dark:text-white">{formatNumber(minVal)}</span>
+            </div>
+            <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+              <span className="text-[10px] font-mono text-slate-400 block">Net Trajectory Delta</span>
+              <span className={`text-sm font-bold font-mono ${delta >= 0 ? 'text-emerald-500 dark:text-emerald-400' : 'text-rose-500'}`}>
+                {deltaSign}{formatNumber(delta)}
+              </span>
+            </div>
+            <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+              <span className="text-[10px] font-mono text-slate-400 block">Trajectory Status</span>
+              <span className="text-sm font-bold font-mono text-[#6D5EF7] dark:text-[#8B7FF9] flex items-center gap-1">
+                <Zap className="w-3.5 h-3.5" /> {statusLabel}
+              </span>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };

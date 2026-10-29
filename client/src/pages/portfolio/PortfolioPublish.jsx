@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { apiService } from '../../services/api';
 import PortfolioPublishCard from '../../components/portfolio/PortfolioPublishCard';
 import PublishSuccessModal from '../../components/portfolio/PublishSuccessModal';
 import { Globe, CheckCircle2, AlertCircle } from 'lucide-react';
 
 export const PortfolioPublish = () => {
+  const { user } = useAuth();
   const [portfolioData, setPortfolioData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
@@ -14,7 +16,7 @@ export const PortfolioPublish = () => {
   const [publishModal, setPublishModal] = useState({
     isOpen: false,
     liveDemoUrl: '',
-    slug: 'shahukarisowmya'
+    slug: user?.slug || user?.username || 'portfolio'
   });
 
   const fetchPortfolio = useCallback(async () => {
@@ -79,7 +81,7 @@ export const PortfolioPublish = () => {
         setPublishModal({
           isOpen: true,
           liveDemoUrl: finalUrl,
-          slug: res.data.slug || 'shahukarisowmya'
+          slug: res.data.slug || user?.slug || user?.username || 'portfolio'
         });
         showToast('success', `Portfolio published live! Access at ${finalUrl}`);
         await fetchPortfolio();

@@ -4,6 +4,8 @@ import SocialPlatform from '../models/SocialPlatform.js';
 import Project from '../models/Project.js';
 import { checkDbStatus } from './dbService.js';
 
+import { getSocialMetrics } from './metricService.js';
+
 /**
  * Calculate date threshold from range code
  */
@@ -26,24 +28,28 @@ export const getAnalyticsOverview = async (userId = null) => {
 
   let platforms = [];
   if (dbStatus.isConnected && userId) {
-    try {
-      platforms = await SocialPlatform.find({ userId, enabled: true }).lean();
-    } catch (e) {
-      console.warn('[Analytics Service] Error fetching platforms:', e.message);
-    }
+    platforms = await getSocialMetrics(userId);
   }
 
-  const ytPlatform = platforms.find(p => p.platform?.toLowerCase() === 'youtube');
-  const ghPlatform = platforms.find(p => p.platform?.toLowerCase() === 'github');
+  let totalFollowers = 0;
+  let totalSubscribers = 0;
+  let githubRepositories = 0;
+  let githubStars = 0;
+  let totalViews = 0;
 
-  const ytConfig = ytPlatform?.config || {};
-  const ghConfig = ghPlatform?.config || {};
+  for (const p of platforms) {
+    const platName = (p.platform || '').toLowerCase();
+    totalFollowers += Number(p.followers || 0);
+    totalViews += Number(p.totalViews || 0);
 
-  const totalFollowers = (ghConfig.followers || 0) + (ytConfig.subscriberCount || 0);
-  const totalSubscribers = ytConfig.subscriberCount || 0;
-  const githubRepositories = ghConfig.publicRepositories !== undefined ? ghConfig.publicRepositories : 0;
-  const githubStars = ghConfig.totalStars || 0;
-  const totalViews = ytConfig.totalViews || 0;
+    if (platName === 'youtube') {
+      totalSubscribers = Number(p.followers || 0);
+    }
+    if (platName === 'github') {
+      githubRepositories = Number(p.contentCount || 0);
+      githubStars = Number(p.stars || 0);
+    }
+  }
 
   let totalProjects = 0;
   if (dbStatus.isConnected && userId) {
@@ -51,7 +57,15 @@ export const getAnalyticsOverview = async (userId = null) => {
       totalProjects = await Project.countDocuments({ userId });
     } catch (e) {}
   }
-  if (totalProjects === 0 && ghPlatform) totalProjects = githubRepositories;
+  if (totalProjects === 0 && githubRepositories > 0) {
+    totalProjects = githubRepositories;
+  }
+
+  const latestSync = platforms.reduce((latest, p) => {
+    if (!p.lastSynced) return latest;
+    const d = new Date(p.lastSynced);
+    return (!latest || d > new Date(latest)) ? p.lastSynced : latest;
+  }, null);
 
   return {
     totalFollowers,
@@ -61,7 +75,26 @@ export const getAnalyticsOverview = async (userId = null) => {
     totalViews,
     totalProjects,
     connectedPlatformsCount: platforms.length,
-    lastSynchronizedTimestamp: ytPlatform?.lastSynced || ghPlatform?.lastSynced || (platforms.length > 0 ? new Date().toISOString() : null),
+    lastSynchronizedTimestamp: latestSync || (platforms.length > 0 ? new Date().toISOString() : null),
+    platforms: platforms.map(p => ({
+      _id: p._id,
+      platform: p.platform,
+      handle: p.handle || p.username,
+      username: p.username || p.handle,
+      profileUrl: p.profileUrl,
+      followers: Number(p.followers || 0),
+      totalViews: Number(p.totalViews || 0),
+      contentCount: Number(p.contentCount || 0),
+      stars: Number(p.stars || 0),
+      engagementRate: Number(p.engagementRate || 0),
+      weeklyGrowthRate: Number(p.weeklyGrowthRate || 0),
+      monthlyGrowthRate: Number(p.monthlyGrowthRate || 0),
+      topContentTitle: p.topContentTitle || null,
+      topContentUrl: p.topContentUrl || null,
+      enabled: p.enabled !== false,
+      lastSynced: p.lastSynced,
+      config: p.config || {}
+    })),
     changes: {
       followersChange: null,
       viewsChange: null,
@@ -79,9 +112,27 @@ export const getAnalyticsHistory = async (userId = null, range = '30d', platform
   const now = Date.now();
 
   const overview = await getAnalyticsOverview(userId);
-  const realFollowers = overview.totalFollowers || 0;
-  const realViews = overview.totalViews || 0;
-  const realStars = overview.githubStars || 0;
+  let realFollowers = overview.totalFollowers || 0;
+  let realViews = overview.totalViews || 0;
+  let realStars = overview.githubStars || 0;
+  let realEngagement = 0;
+
+  if (platformFilter && platformFilter.toLowerCase() !== 'all') {
+    const specificPlat = overview.platforms.find(
+      p => p.platform?.toLowerCase() === platformFilter.toLowerCase()
+    );
+    if (specificPlat) {
+      realFollowers = specificPlat.followers || 0;
+      realViews = specificPlat.totalViews || 0;
+      realStars = specificPlat.stars || 0;
+      realEngagement = specificPlat.engagementRate || 0;
+    } else {
+      realFollowers = 0;
+      realViews = 0;
+      realStars = 0;
+      realEngagement = 0;
+    }
+  }
 
   const series = [];
   for (let i = days; i >= 0; i -= step) {
@@ -91,7 +142,8 @@ export const getAnalyticsHistory = async (userId = null, range = '30d', platform
       timestamp: ts,
       followers: realFollowers,
       views: realViews,
-      stars: realStars
+      stars: realStars,
+      engagement: realEngagement
     });
   }
 

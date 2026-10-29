@@ -58,10 +58,6 @@ export const DashboardLayout = () => {
     { name: 'CLI & Settings', path: '/dashboard/settings', icon: Settings },
   ];
 
-  const publicSlug = profile?.handle 
-    ? profile.handle.replace('@', '') 
-    : (user?.slug || 'shahukarisowmya');
-
   return (
     <div className="min-h-screen bg-[#F7F8FC] dark:bg-[#090D16] text-[#172033] dark:text-slate-100 flex transition-colors duration-200">
       
@@ -128,20 +124,7 @@ export const DashboardLayout = () => {
         </div>
 
         {/* Sidebar Footer */}
-        <div className="space-y-2 pt-4 border-t border-[#E4E7EC] dark:border-slate-800">
-          <Link
-            to={`/p/${publicSlug}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold text-[#475467] dark:text-slate-300 hover:text-[#172033] dark:hover:text-white hover:bg-[#F8F9FC] dark:hover:bg-slate-800/60 transition-colors"
-          >
-            <span className="flex items-center gap-2">
-              <ExternalLink className="w-3.5 h-3.5 text-[#6D5EF7]" />
-              Public Portfolio
-            </span>
-            <ChevronRight className="w-3.5 h-3.5 text-[#98A2B3]" />
-          </Link>
-
+        <div className="pt-4 border-t border-[#E4E7EC] dark:border-slate-800">
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-[#D92D20] hover:bg-[#FEF3F2] dark:hover:bg-rose-950/30 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D92D20]"
@@ -275,20 +258,7 @@ export const DashboardLayout = () => {
               </nav>
             </div>
 
-            <div className="pt-4 border-t border-[#E4E7EC] dark:border-slate-800 space-y-2">
-              <Link
-                to={`/p/${publicSlug}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setMobileSidebarOpen(false)}
-                className="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold text-[#475467] dark:text-slate-300 hover:bg-[#F8F9FC] dark:hover:bg-slate-800/60"
-              >
-                <span className="flex items-center gap-2">
-                  <ExternalLink className="w-3.5 h-3.5 text-[#6D5EF7]" />
-                  Public Portfolio
-                </span>
-                <ChevronRight className="w-3.5 h-3.5 text-[#98A2B3]" />
-              </Link>
+            <div className="pt-4 border-t border-[#E4E7EC] dark:border-slate-800">
               <button 
                 onClick={handleLogout} 
                 className="w-full text-[#D92D20] text-xs font-semibold flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-[#FEF3F2] dark:hover:bg-rose-950/30"

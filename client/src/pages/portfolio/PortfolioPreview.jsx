@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { apiService } from '../../services/api';
 import LivePortfolioPreview from '../../components/portfolio/LivePortfolioPreview';
 import PublishSuccessModal from '../../components/portfolio/PublishSuccessModal';
@@ -23,6 +24,7 @@ const THEME_OPTIONS = [
 
 export const PortfolioPreviewPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [portfolioData, setPortfolioData] = useState(null);
   const [resumeProfile, setResumeProfile] = useState(null);
   const [aiSections, setAiSections] = useState([]);
@@ -38,7 +40,7 @@ export const PortfolioPreviewPage = () => {
   const [publishModal, setPublishModal] = useState({
     isOpen: false,
     liveDemoUrl: '',
-    slug: 'shahukarisowmya'
+    slug: user?.slug || user?.username || 'portfolio'
   });
 
   const fetchPortfolioData = useCallback(async () => {
@@ -158,7 +160,7 @@ export const PortfolioPreviewPage = () => {
     setActionMessage(null);
     try {
       const portId = portfolioData?.id || portfolioData?._id || 'publish';
-      const targetSlug = compiledPortfolio?.slug || portfolioData?.slug || 'shahukarisowmya';
+      const targetSlug = compiledPortfolio?.slug || portfolioData?.slug || user?.slug || user?.username || 'portfolio';
 
       let res = null;
       try {
@@ -248,7 +250,7 @@ export const PortfolioPreviewPage = () => {
   // 3. Success state
   const activeTheme = selectedTheme || compiledPortfolio?.theme || 'modern';
   const isPublished = Boolean(portfolioData?.published || portfolioData?.status === 'PUBLISHED');
-  const publicUrl = `${window.location.origin}/p/${compiledPortfolio?.slug || 'shahukarisowmya'}`;
+  const publicUrl = `${window.location.origin}/p/${compiledPortfolio?.slug || user?.slug || user?.username || 'portfolio'}`;
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-16">
@@ -284,7 +286,7 @@ export const PortfolioPreviewPage = () => {
               </span>
             </div>
             <p className="text-xs text-[#667085] dark:text-slate-400">
-              Grounded on Shahukari Sowmya's uploaded resume and enriched with AI Generator deep dives.
+              Grounded on your uploaded resume and enriched with AI Generator deep dives.
             </p>
           </div>
 

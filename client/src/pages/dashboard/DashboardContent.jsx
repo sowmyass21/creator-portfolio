@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import apiService from '../../services/api';
 import { usePortfolio } from '../../context/PortfolioContext';
 import { useAuth } from '../../context/AuthContext';
+import { formatNumber } from '../../utils/formatters';
 import PublishSuccessModal from '../../components/portfolio/PublishSuccessModal';
 import { 
   Cpu, Sparkles, CheckCircle2, XCircle, Edit3, Save, RotateCw, 
@@ -10,7 +11,7 @@ import {
 } from 'lucide-react';
 
 export const DashboardContent = () => {
-  const { refetchProfile } = usePortfolio();
+  const { profile, metrics, refetchProfile } = usePortfolio();
   const { user } = useAuth();
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -94,7 +95,7 @@ export const DashboardContent = () => {
       setSections(res.data || []);
       setFeedbackMsg({ 
         type: 'success', 
-        text: `All ${res.data?.length || 11} sections synthesized based on Shahukari Sowmya's resume${activeIdea ? ` and AI Idea: "${activeIdea}"` : ''}!` 
+        text: `All ${res.data?.length || 11} sections synthesized based on ${profile?.fullName || user?.name || 'your'} resume credentials${activeIdea ? ` and AI Idea: "${activeIdea}"` : ''}!` 
       });
     } catch (err) {
       setFeedbackMsg({ type: 'error', text: `Generation failed: ${err.message}` });
@@ -113,7 +114,7 @@ export const DashboardContent = () => {
       
       // 2. Also ensure Portfolio document is published
       let demoUrl = aiRes.liveDemoUrl || aiRes.publishedUrl;
-      let finalSlug = aiRes.slug || 'shahukarisowmya';
+      let finalSlug = aiRes.slug || user?.slug || user?.username || profile?.handle?.replace('@', '') || 'portfolio';
 
       try {
         const portRes = await apiService.publishPortfolio(finalSlug);
@@ -255,7 +256,7 @@ export const DashboardContent = () => {
             AI Generator & Management Studio
           </h1>
           <p className="text-xs sm:text-sm text-[#667085] dark:text-slate-400 mt-1">
-            Synthesize, review, edit, approve, and deploy the complete credentials of <span className="text-[#6D5EF7] font-semibold">Shahukari Sowmya</span> tailored by your strategic AI ideas.
+            Synthesize, review, edit, approve, and deploy the complete credentials of <span className="text-[#6D5EF7] font-semibold">{profile?.fullName || user?.name || 'the authenticated creator'}</span> tailored by your strategic AI ideas.
           </p>
         </div>
 
@@ -350,19 +351,24 @@ export const DashboardContent = () => {
         <div className="space-y-1">
           <div className="font-bold flex items-center gap-2 text-[#16803D] dark:text-emerald-400">
             <CheckCircle2 className="w-4 h-4" />
-            Grounding Verified: Shahukari Sowmya
+            Grounding Verified: {profile?.fullName || user?.name || 'Authenticated Creator'}
           </div>
           <p className="text-[11px] text-[#667085] dark:text-slate-400 font-mono">
-            B.Tech ECE at GMRIT (CGPA: 8.88) • ServiceNow CAD & CSA Certified • Abhayasa Semicon VLSI Intern • Flagship Projects: AI Learning Assistant & ShopKart
+            {profile?.tagline || profile?.bio || 'Professional profile grounded on verified credentials and platform data'}
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0 font-mono text-[11px]">
-          <span className="px-2.5 py-1 rounded-xl bg-[#F8F9FC] dark:bg-slate-800 text-[#172033] dark:text-slate-300 border border-[#E4E7EC] dark:border-slate-700">
-            YouTube: @sowmyashahukari (35 Views)
-          </span>
-          <span className="px-2.5 py-1 rounded-xl bg-[#F8F9FC] dark:bg-slate-800 text-[#172033] dark:text-slate-300 border border-[#E4E7EC] dark:border-slate-700">
-            GitHub: @sowmyass21 (9 Repos)
-          </span>
+          {(metrics?.platforms && metrics.platforms.length > 0) ? (
+            metrics.platforms.map((p, idx) => (
+              <span key={idx} className="px-2.5 py-1 rounded-xl bg-[#F8F9FC] dark:bg-slate-800 text-[#172033] dark:text-slate-300 border border-[#E4E7EC] dark:border-slate-700">
+                {p.platform}: {p.handle || p.username} ({formatNumber(p.followers || 0)} {p.metricLabel || 'Followers'})
+              </span>
+            ))
+          ) : (
+            <span className="px-2.5 py-1 rounded-xl bg-[#F8F9FC] dark:bg-slate-800 text-[#172033] dark:text-slate-300 border border-[#E4E7EC] dark:border-slate-700">
+              Personalized Creator Studio
+            </span>
+          )}
         </div>
       </div>
 
@@ -436,7 +442,7 @@ export const DashboardContent = () => {
           <Cpu className="w-12 h-12 text-[#667085] mx-auto" />
           <h3 className="text-base font-bold text-[#172033] dark:text-white">No AI Generated Content Found</h3>
           <p className="text-xs text-[#667085] dark:text-slate-400 max-w-md mx-auto">
-            Click "AI Generate All (with Idea)" above to synthesize all 11 portfolio sections directly grounded in Shahukari Sowmya's uploaded resume and verified platform channels.
+            Click "AI Generate All (with Idea)" above to synthesize all 11 portfolio sections directly grounded in your uploaded resume and verified platform channels.
           </p>
           <button
             onClick={() => handleGenerateAll()}

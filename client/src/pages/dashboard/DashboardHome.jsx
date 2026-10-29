@@ -12,7 +12,8 @@ import {
 export const DashboardHome = () => {
   const { user, role } = useAuth();
   const { profile, projects, metrics, healthStatus, refetchMetrics } = usePortfolio();
-  const [adminOverview, setAdminOverview] = useState(null);
+  const [analyticsOverview, setAnalyticsOverview] = useState(null);
+  const [userPlatforms, setUserPlatforms] = useState([]);
   const [syncStatus, setSyncStatus] = useState(null);
   const [syncing, setSyncing] = useState(false);
   const [aiContentCount, setAiContentCount] = useState({ total: 0, approved: 0 });
@@ -21,18 +22,24 @@ export const DashboardHome = () => {
   useEffect(() => {
     const loadOverviewData = async () => {
       try {
-        const [overviewRes, syncRes, aiRes] = await Promise.allSettled([
-          apiService.getAdminOverview(),
+        const [overviewRes, syncRes, aiRes, platformsRes] = await Promise.allSettled([
+          apiService.getAnalyticsOverview(),
           apiService.getSyncStatus(),
-          apiService.getAiContent()
+          apiService.getAiContent(),
+          apiService.getSocialPlatforms()
         ]);
 
-        if (overviewRes.status === 'fulfilled') setAdminOverview(overviewRes.value?.data);
+        if (overviewRes.status === 'fulfilled' && overviewRes.value?.data) {
+          setAnalyticsOverview(overviewRes.value.data);
+        }
         if (syncRes.status === 'fulfilled') setSyncStatus(syncRes.value?.data);
         if (aiRes.status === 'fulfilled' && aiRes.value?.data) {
           const docs = aiRes.value.data;
           const approved = docs.filter(d => d.approved).length;
           setAiContentCount({ total: docs.length, approved });
+        }
+        if (platformsRes.status === 'fulfilled' && platformsRes.value?.data) {
+          setUserPlatforms(platformsRes.value.data);
         }
       } catch (err) {
         console.error('Failed to load overview widgets:', err);
@@ -48,9 +55,19 @@ export const DashboardHome = () => {
       if (refetchMetrics) {
         await refetchMetrics();
       }
-      const updatedSync = await apiService.getSyncStatus();
-      if (updatedSync?.data) {
-        setSyncStatus(updatedSync.data);
+      const [updatedSync, updatedOverview, updatedPlatforms] = await Promise.allSettled([
+        apiService.getSyncStatus(),
+        apiService.getAnalyticsOverview(),
+        apiService.getSocialPlatforms()
+      ]);
+      if (updatedSync.status === 'fulfilled' && updatedSync.value?.data) {
+        setSyncStatus(updatedSync.value.data);
+      }
+      if (updatedOverview.status === 'fulfilled' && updatedOverview.value?.data) {
+        setAnalyticsOverview(updatedOverview.value.data);
+      }
+      if (updatedPlatforms.status === 'fulfilled' && updatedPlatforms.value?.data) {
+        setUserPlatforms(updatedPlatforms.value.data);
       }
     } catch (err) {
       console.error('Sync failed:', err);
@@ -61,7 +78,7 @@ export const DashboardHome = () => {
 
   const publicSlug = profile?.handle 
     ? profile.handle.replace('@', '') 
-    : (user?.slug || 'shahukarisowmya');
+    : (user?.slug || user?.username || user?.email?.split('@')[0] || 'creator');
 
   const publicPortfolioUrl = `/p/${publicSlug}`;
 
@@ -72,19 +89,57 @@ export const DashboardHome = () => {
     setTimeout(() => setCopiedUrl(false), 2000);
   };
 
-  // Verified platforms data
-  const platformsData = (metrics?.platforms && metrics.platforms.length > 0)
+  // Strictly use real platform data belonging to the authenticated user
+  const rawPlatforms = (metrics?.platforms && metrics.platforms.length > 0)
     ? metrics.platforms
-    : [
-        { platform: 'YouTube', handle: profile?.socials?.youtube || '@sowmyashahukari', followers: 35, metricLabel: 'Views', status: 'Connected', lastSync: 'Live sync' },
-        { platform: 'GitHub', handle: profile?.socials?.github || 'sowmyass21', followers: 9, metricLabel: 'Repositories', status: 'Connected', lastSync: 'Live sync' },
-        { platform: 'LinkedIn', handle: profile?.socials?.linkedin || 'sowmya-shahukari', followers: 150, metricLabel: 'Connections', status: 'Connected', lastSync: 'Sync active' },
-      ];
+    : userPlatforms;
 
-  const totalAudience = metrics?.summary?.totalFollowers || profile?.statsSummary?.totalAudience || 384500;
-  const totalViews = metrics?.summary?.totalViews || profile?.statsSummary?.monthlyViews || 16050000;
-  const publishedProjectsCount = projects?.length || profile?.statsSummary?.publishedProjects || 4;
-  const engagementRate = metrics?.summary?.avgEngagementRate || profile?.statsSummary?.avgEngagementRate || '6.8';
+  const platformsData = (rawPlatforms || [])
+    .filter(p => p && p.platform && p.enabled !== false)
+    .map(p => {
+      const cfg = p.config || {};
+      const followers = p.followers ?? cfg.followers ?? cfg.subscriberCount ?? cfg.connections ?? cfg.rating ?? 0;
+      const handle = p.handle || p.username || (p.profileUrl ? p.profileUrl.split('/').pop() : '') || `@${(p.platform || '').toLowerCase()}`;
+      const metricLabel = p.metricLabel || (
+        p.platform === 'YouTube' ? 'Subscribers' :
+        p.platform === 'GitHub' ? 'Repositories' :
+        p.platform === 'LinkedIn' ? 'Connections' :
+        p.platform === 'LeetCode' ? 'Problems Solved' :
+        p.platform === 'CodeChef' ? 'Rating' :
+        'Followers'
+      );
+      const lastSync = p.lastSynced 
+        ? formatDate(p.lastSynced) 
+        : (p.lastSync || 'Active feed');
+      return {
+        platform: p.platform,
+        handle,
+        followers,
+        metricLabel,
+        status: 'Connected',
+        lastSync
+      };
+    });
+
+  // Real overview metrics strictly belonging to the logged in user
+  const totalAudience = metrics?.summary?.totalFollowers 
+    ?? analyticsOverview?.totalFollowers 
+    ?? profile?.statsSummary?.totalAudience 
+    ?? 0;
+
+  const totalViews = metrics?.summary?.totalViews 
+    ?? analyticsOverview?.totalViews 
+    ?? profile?.statsSummary?.monthlyViews 
+    ?? 0;
+
+  const publishedProjectsCount = projects?.length 
+    ?? analyticsOverview?.totalProjects 
+    ?? profile?.statsSummary?.publishedProjects 
+    ?? 0;
+
+  const engagementRate = metrics?.summary?.avgEngagementRate 
+    ?? profile?.statsSummary?.avgEngagementRate 
+    ?? 0;
 
   return (
     <div className="space-y-6 max-w-7xl">
@@ -237,37 +292,54 @@ export const DashboardHome = () => {
           </div>
 
           <div className="space-y-3">
-            {platformsData.map((plat, idx) => (
-              <div 
-                key={idx} 
-                className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl bg-[#F8F9FC] dark:bg-[#131D31] border border-[#E4E7EC] dark:border-slate-800 gap-3"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-white dark:bg-slate-800 border border-[#E4E7EC] dark:border-slate-700 flex items-center justify-center font-bold text-xs text-[#6D5EF7] shadow-xs">
-                    {plat.platform.charAt(0)}
+            {platformsData.length > 0 ? (
+              platformsData.map((plat, idx) => (
+                <div 
+                  key={idx} 
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl bg-[#F8F9FC] dark:bg-[#131D31] border border-[#E4E7EC] dark:border-slate-800 gap-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-white dark:bg-slate-800 border border-[#E4E7EC] dark:border-slate-700 flex items-center justify-center font-bold text-xs text-[#6D5EF7] shadow-xs">
+                      {plat.platform.charAt(0)}
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-[#172033] dark:text-white">{plat.platform}</div>
+                      <div className="text-[11px] text-[#667085] dark:text-slate-400 font-mono">{plat.handle}</div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-xs font-bold text-[#172033] dark:text-white">{plat.platform}</div>
-                    <div className="text-[11px] text-[#667085] dark:text-slate-400 font-mono">{plat.handle}</div>
-                  </div>
-                </div>
 
-                <div className="flex items-center justify-between sm:justify-end gap-4">
-                  <div className="text-left sm:text-right">
-                    <div className="text-xs font-bold text-[#172033] dark:text-white">
-                      {formatNumber(plat.followers || 0)} {plat.metricLabel || 'Followers'}
+                  <div className="flex items-center justify-between sm:justify-end gap-4">
+                    <div className="text-left sm:text-right">
+                      <div className="text-xs font-bold text-[#172033] dark:text-white">
+                        {formatNumber(plat.followers || 0)} {plat.metricLabel || 'Followers'}
+                      </div>
+                      <div className="text-[10px] text-[#667085] dark:text-slate-400 font-medium">
+                        {plat.lastSync || 'Active feed'}
+                      </div>
                     </div>
-                    <div className="text-[10px] text-[#667085] dark:text-slate-400 font-medium">
-                      {plat.lastSync || 'Active feed'}
-                    </div>
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-[#16803D] dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-[11px] font-semibold">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#16803D]"></span>
+                      Connected
+                    </span>
                   </div>
-                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-[#16803D] dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-[11px] font-semibold">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#16803D]"></span>
-                    Connected
-                  </span>
                 </div>
+              ))
+            ) : (
+              <div className="p-8 text-center rounded-xl bg-[#F8F9FC] dark:bg-[#131D31] border border-dashed border-[#E4E7EC] dark:border-slate-800">
+                <Globe className="w-8 h-8 text-slate-400 mx-auto mb-2 opacity-50" />
+                <p className="text-xs font-semibold text-[#172033] dark:text-white">No platforms connected yet</p>
+                <p className="text-[11px] text-[#667085] dark:text-slate-400 mt-1 max-w-sm mx-auto">
+                  Connect your GitHub, YouTube, or LinkedIn accounts to synchronize live metrics.
+                </p>
+                <Link
+                  to="/dashboard/platforms"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 mt-3 rounded-lg bg-[#6D5EF7] text-white text-xs font-semibold hover:bg-[#5B4CE6] transition-colors"
+                >
+                  <span>Connect Platforms</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
               </div>
-            ))}
+            )}
           </div>
         </section>
 
@@ -287,7 +359,7 @@ export const DashboardHome = () => {
                 <span className="text-[11px] font-medium text-[#667085] dark:text-slate-400 block">System Status:</span>
                 <span className="font-bold text-[#16803D] dark:text-emerald-400 flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-[#16803D] animate-pulse"></span>
-                  {adminOverview?.systemStatus || 'Operational'}
+                  Operational
                 </span>
               </div>
 
@@ -296,19 +368,29 @@ export const DashboardHome = () => {
                 <span className="font-semibold text-[#172033] dark:text-white font-mono text-[11px]">
                   {syncStatus?.lastSyncTimestamp 
                     ? formatDate(syncStatus.lastSyncTimestamp) 
-                    : adminOverview?.lastSyncTimestamp 
-                    ? formatDate(adminOverview.lastSyncTimestamp) 
-                    : 'Real-time verified'}
+                    : analyticsOverview?.lastSynchronizedTimestamp 
+                    ? formatDate(analyticsOverview.lastSynchronizedTimestamp) 
+                    : platformsData.length > 0
+                    ? 'Real-time verified'
+                    : 'No sync history'}
                 </span>
               </div>
 
               <div className="p-3.5 rounded-xl bg-[#F8F9FC] dark:bg-[#131D31] border border-[#E4E7EC] dark:border-slate-800 space-y-1">
                 <span className="text-[11px] font-medium text-[#667085] dark:text-slate-400 block">Connected Services:</span>
-                <div className="flex flex-wrap gap-1.5 mt-1">
-                  <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-white dark:bg-slate-800 border border-[#E4E7EC] dark:border-slate-700 text-[#172033] dark:text-slate-200">YouTube</span>
-                  <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-white dark:bg-slate-800 border border-[#E4E7EC] dark:border-slate-700 text-[#172033] dark:text-slate-200">GitHub</span>
-                  <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-white dark:bg-slate-800 border border-[#E4E7EC] dark:border-slate-700 text-[#172033] dark:text-slate-200">LinkedIn</span>
-                </div>
+                {platformsData.length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5 mt-1">
+                    {platformsData.map((plat, idx) => (
+                      <span key={idx} className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-white dark:bg-slate-800 border border-[#E4E7EC] dark:border-slate-700 text-[#172033] dark:text-slate-200">
+                        {plat.platform}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-[11px] text-[#667085] dark:text-slate-400 mt-1 italic">
+                    None connected
+                  </div>
+                )}
               </div>
             </div>
           </div>

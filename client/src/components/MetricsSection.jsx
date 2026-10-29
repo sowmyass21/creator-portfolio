@@ -35,7 +35,7 @@ export const MetricsSection = () => {
             <div>
               <div className="text-xs text-slate-400 font-medium">Total Audience</div>
               <div className="text-2xl font-extrabold text-white font-mono tracking-tight mt-0.5">
-                {formatNumber(summary?.totalFollowers || 384500)}
+                {formatNumber(summary?.totalFollowers ?? 0)}
               </div>
             </div>
           </div>
@@ -47,7 +47,7 @@ export const MetricsSection = () => {
             <div>
               <div className="text-xs text-slate-400 font-medium">Total Content Views</div>
               <div className="text-2xl font-extrabold text-white font-mono tracking-tight mt-0.5">
-                {formatNumber(summary?.totalViews || 16050000)}
+                {formatNumber(summary?.totalViews ?? 0)}
               </div>
             </div>
           </div>
@@ -59,7 +59,7 @@ export const MetricsSection = () => {
             <div>
               <div className="text-xs text-slate-400 font-medium">Avg Engagement</div>
               <div className="text-2xl font-extrabold text-emerald-400 font-mono tracking-tight mt-0.5">
-                {summary?.avgEngagementRate || 18.0}%
+                {summary?.avgEngagementRate ?? 0}%
               </div>
             </div>
           </div>
@@ -71,7 +71,7 @@ export const MetricsSection = () => {
             <div>
               <div className="text-xs text-slate-400 font-medium">Tracked Platforms</div>
               <div className="text-2xl font-extrabold text-white font-mono tracking-tight mt-0.5">
-                {summary?.platformCount || platforms.length || 4}
+                {summary?.platformCount ?? platforms.length ?? 0}
               </div>
             </div>
           </div>

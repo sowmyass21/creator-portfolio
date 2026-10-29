@@ -62,28 +62,28 @@ export const HeroSection = () => {
               <div className="p-3 rounded-xl bg-slate-900/50 border border-slate-800/80 text-left">
                 <div className="text-xs text-slate-400 font-medium">Total Reach</div>
                 <div className="text-lg font-bold text-white font-mono mt-0.5">
-                  {formatNumber(profile?.statsSummary?.totalAudience || 384500)}
+                  {formatNumber(profile?.statsSummary?.totalAudience ?? 0)}
                 </div>
               </div>
 
               <div className="p-3 rounded-xl bg-slate-900/50 border border-slate-800/80 text-left">
                 <div className="text-xs text-slate-400 font-medium">Monthly Views</div>
                 <div className="text-lg font-bold text-white font-mono mt-0.5">
-                  {formatNumber(profile?.statsSummary?.monthlyViews || 1250000)}
+                  {formatNumber(profile?.statsSummary?.monthlyViews ?? 0)}
                 </div>
               </div>
 
               <div className="p-3 rounded-xl bg-slate-900/50 border border-slate-800/80 text-left">
                 <div className="text-xs text-slate-400 font-medium">Avg Engagement</div>
                 <div className="text-lg font-bold text-emerald-400 font-mono mt-0.5">
-                  {profile?.statsSummary?.avgEngagementRate || 6.8}%
+                  {profile?.statsSummary?.avgEngagementRate ?? 0}%
                 </div>
               </div>
 
               <div className="p-3 rounded-xl bg-slate-900/50 border border-slate-800/80 text-left">
                 <div className="text-xs text-slate-400 font-medium">Projects</div>
                 <div className="text-lg font-bold text-brand-purple font-mono mt-0.5">
-                  {profile?.statsSummary?.publishedProjects || 14}+
+                  {profile?.statsSummary?.publishedProjects ?? 0}
                 </div>
               </div>
             </div>

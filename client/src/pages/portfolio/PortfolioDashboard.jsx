@@ -154,7 +154,7 @@ export const PortfolioDashboard = () => {
   const completeness = calculateCompleteness();
 
   const isPublished = Boolean(portfolioData?.published || portfolioData?.status === 'PUBLISHED' || portfolioData?.meta?.isPublished);
-  const currentSlug = compiledPortfolio?.slug || portfolioData?.slug || 'shahukarisowmya';
+  const currentSlug = compiledPortfolio?.slug || portfolioData?.slug || user?.slug || user?.username || profile?.handle?.replace('@', '') || 'portfolio';
   const publicUrl = `${window.location.origin}/p/${currentSlug}`;
   const activeTheme = portfolioData?.theme || 'modern';
   const lastUpdated = portfolioData?.updatedAt ? new Date(portfolioData.updatedAt).toLocaleString() : 'Just now';
@@ -249,7 +249,7 @@ export const PortfolioDashboard = () => {
             </h1>
 
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              Transform your resume into a live, interactive creator portfolio based on Shahukari Sowmya's verified credentials and enhanced with AI generator highlights.
+              Transform your resume into a live, interactive creator portfolio based on your verified credentials and enhanced with AI generator highlights.
             </p>
           </div>
 
@@ -354,7 +354,7 @@ export const PortfolioDashboard = () => {
               </span>
             </div>
             <p className="text-xs text-slate-400">
-              Interactive preview directly compiling Shahukari Sowmya's resume data and AI generator enhancements.
+              Interactive preview directly compiling your resume data and AI generator enhancements.
             </p>
           </div>
 
@@ -451,7 +451,7 @@ export const PortfolioDashboard = () => {
               Resume Source
             </span>
             <div className="text-sm font-bold text-slate-900 dark:text-white truncate pt-1">
-              {resumeStatus?.filename || 'Shahukari_Sowmya_Resume.pdf'}
+              {resumeStatus?.filename || 'No resume uploaded yet'}
             </div>
           </div>
           <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">

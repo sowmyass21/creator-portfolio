@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import apiService from '../services/api';
 
-export const useAnalytics = (initialRange = '30d') => {
+export const useAnalytics = (initialRange = '30d', initialPlatform = 'All') => {
   const [range, setRange] = useState(initialRange);
+  const [selectedPlatform, setSelectedPlatform] = useState(initialPlatform);
   const [overview, setOverview] = useState(null);
   const [history, setHistory] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -12,9 +13,10 @@ export const useAnalytics = (initialRange = '30d') => {
     setLoading(true);
     setError(null);
     try {
+      const platParam = (selectedPlatform && selectedPlatform !== 'All') ? selectedPlatform : null;
       const [overviewRes, historyRes] = await Promise.all([
         apiService.getAnalyticsOverview().catch(err => null),
-        apiService.getAnalyticsHistory(range).catch(err => null)
+        apiService.getAnalyticsHistory(range, platParam).catch(err => null)
       ]);
 
       if (overviewRes && overviewRes.data) {
@@ -33,13 +35,15 @@ export const useAnalytics = (initialRange = '30d') => {
 
   useEffect(() => {
     fetchAnalytics();
-  }, [range]);
+  }, [range, selectedPlatform]);
 
   return {
     overview,
     history,
     range,
     setRange,
+    selectedPlatform,
+    setSelectedPlatform,
     loading,
     error,
     refetch: fetchAnalytics
